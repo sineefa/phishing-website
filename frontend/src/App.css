@@ -1,0 +1,165 @@
+/* General styles (unchanged) */
+.App {
+  text-align: center;
+  min-height: 100vh;
+  background-image: url('./assets/system-hacked-warning-alert-on-600nw-2329841447.webp');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding-top: 50px;
+}
+
+.App::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(25, 55, 55, 0.5);
+  z-index: 1;
+}
+
+.App-header {
+  position: relative;
+  z-index: 2;
+  color: white;
+  text-align: center;
+  width: 100%;
+}
+
+h1 i {
+  color: #ffcc00;
+  font-size: 1.5em;
+  margin-right: 10px;
+}
+
+form {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
+
+input {
+  padding: 12px 20px;
+  font-size: 16px;
+  width: 300px;
+  border-radius: 5px;
+  border: 1px solid transparent;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  margin-right: 15px;
+}
+
+input:focus {
+  outline: none;
+  box-shadow: 0 0 10px #39FF14;
+  border: 1px solid #39FF14;
+}
+
+button {
+  padding: 12px 25px;
+  font-size: 16px;
+  background: linear-gradient(45deg, #ff0000, #ff8c00);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.footer {
+  position: absolute;
+  bottom: 20px;
+  width: 100%;
+  text-align: center;
+  color: #fff;
+  font-size: 1em;
+}
+
+/* Blinking styles for results */
+
+/* Blinking red for Phishing */
+.phishing-result {
+  font-size: 18px;
+  color: #ff0000; /* Red for Phishing */
+  margin-top: 20px;
+  font-weight: bold;
+  animation: blink-red 1s linear infinite;
+}
+
+/* Blinking green for Not Phishing */
+.not-phishing-result {
+  font-size: 18px;
+  color: #28a745; /* Green for Not Phishing */
+  margin-top: 20px;
+  font-weight: bold;
+  animation: blink-green 1s linear infinite;
+}
+
+/* Blinking alert icon */
+.blinking-icon {
+  margin-right: 10px;
+  animation: blink 1s linear infinite;
+  color: red;
+}
+
+/* Keyframes for red blink (Phishing) */
+@keyframes blink-red {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+/* Keyframes for green blink (Not Phishing) */
+@keyframes blink-green {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+
+.loading-message {
+  font-size: 1.2em;
+  margin: 10px 0;
+  
+}
+
+.spinner {
+  border: 4px solid #f3f3f3; /* Light grey */
+  border-top: 4px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 15px;
+  height: 15px;
+  animation: spin 2s linear infinite;
+  display: inline-block;
+  margin-left: 5px;
+  margin-top: 10px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Additional styles for error and results */
+.error-message {
+  color: red;
+}
+
+.phishing-result {
+  color: red;
+}
+
+.not-phishing-result {
+  color: green;
+}
