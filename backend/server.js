@@ -7,7 +7,7 @@ const { spawn } = require("child_process");
 const app = express();
 const port = 5000;
 
-const API_URL = "https://sylu1027vx8l2d8r.us-east-1.aws.endpoints.huggingface.cloud";
+const API_URL = "https://gfp6ousrgw8gfh9m.us-east-1.aws.endpoints.huggingface.cloud";
 const headers = {
   Accept: "application/json",
   "Content-Type": "application/json",
