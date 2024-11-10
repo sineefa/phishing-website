@@ -51,6 +51,13 @@ function fetchWhoisInfo(url) {
   });
 }
 
+async function classifyUrl(url) {
+  const payload = { inputs: url };
+  const classificationResponse = await axios.post(API_URL, payload, { headers });
+  const predictedClass = classificationResponse.data.predicted_class;
+  return predictedClass === 1 ? "Malicious URL (Phishing)" : "Benign URL";
+}
+
 app.post("/classify", async (req, res) => {
   const { url } = req.body;
 
@@ -59,35 +66,136 @@ app.post("/classify", async (req, res) => {
   }
 
   try {
-    // Fetch WHOIS data first
-    const whoisInfo = await fetchWhoisInfo(url);
+    // Run WHOIS lookup and classification in parallel
+    const [whoisResult, classificationResult] = await Promise.allSettled([fetchWhoisInfo(url), classifyUrl(url)]);
 
-    // Prepare the response object with WHOIS data included
-    let response = { whoisInfo, result: null };
+    // Prepare response
+    const response = {
+      whoisInfo: null,
+      result: "Unknown result",
+    };
 
-    try {
-      // Perform classification only after WHOIS data
-      const payload = { inputs: url };
-      const classificationResponse = await axios.post(API_URL, payload, { headers });
-      const predictedClass = classificationResponse.data.predicted_class;
+    // WHOIS data handling
+    if (whoisResult.status === "fulfilled") {
+      response.whoisInfo = whoisResult.value;
+    } else {
+      // Set WHOIS info as not alive if WHOIS lookup failed
+      response.whoisInfo = {
+        domainName: null,
+        creationDate: null,
+        registryExpiryDate: null,
+      };
+    }
 
-      // Append the classification result
-      response.result = predictedClass === 1 ? "Malicious URL (Phishing)" : "Benign URL";
-    } catch (classificationError) {
-      console.error(`Error in classification: ${classificationError.message}`);
+    // Classification result handling
+    if (classificationResult.status === "fulfilled") {
+      response.result = classificationResult.value;
+    } else {
+      console.error(`Error in classification: ${classificationResult.reason}`);
       response.result = "Error in classification";
     }
 
     res.json(response);
   } catch (error) {
-    console.error(`Error in WHOIS lookup: ${error}`);
-    res.status(500).json({ result: "Error in WHOIS lookup", error: error.message });
+    console.error(`Unexpected error: ${error}`);
+    res.status(500).json({ result: "Internal server error", error: error.message });
   }
 });
 
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });
+
+// const express = require("express");
+// const cors = require("cors");
+// const bodyParser = require("body-parser");
+// const axios = require("axios");
+// const { spawn } = require("child_process");
+
+// const app = express();
+// const port = 5000;
+
+// const API_URL = "https://gfp6ousrgw8gfh9m.us-east-1.aws.endpoints.huggingface.cloud";
+// const headers = {
+//   Accept: "application/json",
+//   "Content-Type": "application/json",
+// };
+
+// app.use(cors());
+// app.use(bodyParser.json());
+
+// function isValidUrl(url) {
+//   try {
+//     new URL(url);
+//     return true;
+//   } catch (_) {
+//     return false;
+//   }
+// }
+
+// function fetchWhoisInfo(url) {
+//   return new Promise((resolve, reject) => {
+//     const pythonProcess = spawn("python", ["whois_extractor.py", url]);
+
+//     let data = "";
+//     pythonProcess.stdout.on("data", (chunk) => {
+//       data += chunk;
+//     });
+
+//     pythonProcess.stderr.on("data", (error) => {
+//       console.error(`WHOIS error: ${error}`);
+//       reject("Error fetching WHOIS data");
+//     });
+
+//     pythonProcess.on("close", () => {
+//       try {
+//         const whoisInfo = JSON.parse(data);
+//         resolve(whoisInfo);
+//       } catch (error) {
+//         console.error(`Error parsing WHOIS JSON: ${error}`);
+//         reject("Error parsing WHOIS data");
+//       }
+//     });
+//   });
+// }
+
+// app.post("/classify", async (req, res) => {
+//   const { url } = req.body;
+
+//   if (!isValidUrl(url)) {
+//     return res.status(400).json({ result: "Invalid URL format" });
+//   }
+
+//   try {
+//     // Fetch WHOIS data first
+//     const whoisInfo = await fetchWhoisInfo(url);
+
+//     // Prepare the response object with WHOIS data included
+//     let response = { whoisInfo, result: null };
+
+//     try {
+//       // Perform classification only after WHOIS data
+//       const payload = { inputs: url };
+//       const classificationResponse = await axios.post(API_URL, payload, { headers });
+//       const predictedClass = classificationResponse.data.predicted_class;
+
+//       // Append the classification result
+//       response.result = predictedClass === 1 ? "Malicious URL (Phishing)" : "Benign URL";
+//     } catch (classificationError) {
+//       console.error(`Error in classification: ${classificationError.message}`);
+//       response.result = "Error in classification";
+//     }
+
+//     res.json(response);
+//   } catch (error) {
+//     console.error(`Error in WHOIS lookup: ${error}`);
+//     res.status(500).json({ result: "Error in WHOIS lookup", error: error.message });
+//   }
+// });
+
+// app.listen(port, () => {
+//   console.log(`Server running on http://localhost:${port}`);
+// });
 
 // const express = require("express");
 // const cors = require("cors");
